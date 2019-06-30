@@ -1,0 +1,27 @@
+
+# NNAR MODEL
+
+c=data.frame(read.csv("germany.csv"))
+
+train=c[1:432,2]
+test1= c[433:444,2]
+test2= c[433:456,2]
+test3= c[433:468,2]
+
+library(forecast)
+library(nnfor)
+mymodel=nnetar(ts(train))
+mymodel
+
+
+forecast1=data.frame(forecast(mymodel,h=12))
+forecast2=data.frame(forecast(mymodel,h=24))
+forecast3=data.frame(forecast(mymodel,h=36))
+
+accuracy(test1,forecast1[,1])
+
+accuracy(test2,forecast2[,1])
+
+
+accuracy(test3,forecast3[,1])
+
