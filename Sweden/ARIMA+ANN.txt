@@ -1,0 +1,41 @@
+# ARIMA + NNAR
+
+c=data.frame(read.csv("sweden.csv"))
+
+train=c[1:396,2]
+test1= c[397:408,2]
+test2= c[397:420,2]
+test3= c[397:432,2]
+
+#ARIMA MODEL
+library(forecast)
+mymodel.linear=auto.arima(ts(train))
+mymodel.linear
+
+res=residuals(mymodel.linear)
+
+qqnorm(res); qqline(res,lwd=2, col = 2)
+
+#NNAR
+library(caret)
+mymodel.nonlinear=mlp(ts(res))
+mymodel.nonlinear
+
+forecast.linear1=data.frame(forecast(mymodel.linear,h=12))
+forecast.nonlinear1=data.frame(forecast(mymodel.nonlinear,h=12))
+comb.forecast1=forecast.linear1[,1]+forecast.nonlinear1[,1]
+
+
+forecast.linear2=data.frame(forecast(mymodel.linear,h=24))
+forecast.nonlinear2=data.frame(forecast(mymodel.nonlinear,h=24))
+comb.forecast2=forecast.linear2[,1]+forecast.nonlinear2[,1]
+
+
+
+forecast.linear3=data.frame(forecast(mymodel.linear,h=36))
+forecast.nonlinear3=data.frame(forecast(mymodel.nonlinear,h=36))
+comb.forecast3=forecast.linear3[,1]+forecast.nonlinear3[,1]
+
+accuracy(test1,comb.forecast1)
+accuracy(test2,comb.forecast2)
+accuracy(test3,comb.forecast3)
