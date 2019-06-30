@@ -1,0 +1,60 @@
+ARIMA X NNAR
+
+c=data.frame(read.csv("switzerland.csv"))
+
+train=c[1:432,2]
+
+test1= c[433:444,2]
+test2= c[433:456,2]
+test3= c[433:468,2]
+
+plot(train,col="blue",type="l",lwd=2,ylab="",xlab="Months")
+
+#ARIMA MODEL
+library(forecast)
+mymodel.linear = auto.arima(ts(train))
+mymodel.linear
+
+st.train=diff(train,differences=2)
+acf(st.train,main="",lwd=2)   #ACF plot
+pacf(st.train,main="",lwd=2,ylab="PACF" )  #PACF Plot
+
+pred=fitted(mymodel.linear)   #obtaining fitted values
+res=train/pred       #obtaining residual from multiplicative model
+
+#check_whether_res_is_normal
+library(qqPlot)
+library(qualityTools)
+qqPlot(res,y="log-normal",col='blue')
+
+#NNAR
+library(caret)
+mymodel.nonlinear=mlp(ts(res))
+mymodel.nonlinear
+
+##########	FORECAST 1	############
+forecast.linear1=data.frame(forecast(mymodel.linear,h=12))
+forecast.nonlinear1=data.frame(forecast(mymodel.nonlinear,h=12))
+comb.forecast1=forecast.linear1[,1]*forecast.nonlinear1[,1]
+
+##########	FORECAST 2	############
+forecast.linear2=data.frame(forecast(mymodel.linear,h=24))
+forecast.nonlinear2=data.frame(forecast(mymodel.nonlinear,h=24))
+comb.forecast2=forecast.linear2[,1]*forecast.nonlinear2[,1]
+
+##########	FORECAST 3	############
+forecast.linear3=data.frame(forecast(mymodel.linear,h=36))
+forecast.nonlinear3=data.frame(forecast(mymodel.nonlinear,h=36))
+comb.forecast3=forecast.linear3[,1]*forecast.nonlinear3[,1]
+
+##########	accuracy for FORECAST 1	############
+accuracy(test1,comb.forecast1)
+
+##########	accuracy for FORECAST 2	############
+accuracy(test2,comb.forecast2)
+
+##########	accuracy for FORECAST 3	############
+accuracy(test3,comb.forecast3)
+
+
+
